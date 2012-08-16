@@ -31,8 +31,10 @@ module Tootsie
       @logger.info("Running command: #{command_line}") if @logger.info?
       IO.popen(command_line, "r:#{@options[:output_encoding] || 'utf-8'}") do |output|
         output.each_line do |line|
-          @logger.info("[Command output] #{line.strip}") if @logger.info?
-          yield line if block_given?
+          line.split(/\r/).each do |linepart|
+            @logger.info("[Command output] #{linepart.strip}") if @logger.info?
+            yield linepart if block_given?
+          end
         end
       end
       status = $?

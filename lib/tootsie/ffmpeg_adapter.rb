@@ -1,5 +1,7 @@
 module Tootsie
 
+  class FfmpegError < StandardError; end
+
   class FfmpegAdapter
     
     def initialize(options = {})
@@ -8,7 +10,9 @@ module Tootsie
       @ffmpeg_arguments = {}
       @ffmpeg_arguments['threads'] = (options[:thread_count] || 1)
       @ffmpeg_arguments['v'] = 1
-      @ffmpeg_arguments['xerror'] = true
+      # TODO: This will cause some streams to abort when they contain just a
+      #   few corrupt frames. Disabling for now.
+      #@ffmpeg_arguments['xerror'] = true
       # TODO: Only in newer FFmpeg versions
       #@ffmpeg_arguments['loglevel'] = 'verbose'
       @ffmpeg_arguments['y'] = true
@@ -48,26 +52,50 @@ module Tootsie
       end
       arguments['f'] = options[:format] if options[:format]
 
-      progress, expected_duration = @progress, nil
+      progress, expected_duration, final_duration, stream_count,
+        error_count = @progress, nil, nil, 0, 0
       result_width, result_height = nil
       run_ffmpeg(input_filename, output_filename, arguments) do |line|
-        if progress
-          case line
-            when /^\s*Duration: (\d+):(\d+):(\d+)\./
-              unless expected_duration
-                hours, minutes, seconds = $1.to_i, $2.to_i, $3.to_i
-                expected_duration = seconds + minutes * 60 + hours * 60 * 60
-              end
-            when /^frame=.* time=(\d+)\./
-              if expected_duration
-                elapsed_time = $1.to_i
-              end
-            when /Stream.*Video: .*, (\d+)x(\d+)\s/
-              unless result_width and result_height
-                result_width, result_height = $1.to_i, $2.to_i
-              end
+        case line
+          when /^Input #\d/
+            stream_count += 1
+          when /^\s*Duration: (\d+):(\d+):(\d+)\./
+            unless expected_duration
+              hours, minutes, seconds = $1.to_i, $2.to_i, $3.to_i
+              expected_duration = seconds + minutes * 60 + hours * 60 * 60
+            end
+          when /^frame=.* time=(\d+)\./
+            if expected_duration
+              elapsed_time = $1.to_i
+            end
+          when /^size=.*time=(\d+):(\d+):(\d+)\./
+            hours, minutes, seconds = $1.to_i, $2.to_i, $3.to_i
+            final_duration = seconds + minutes * 60 + hours * 60 * 60
+          when /^size=.*time=(\d+\.\d+)/
+            final_duration = $1.to_f
+          when /Stream.*Video: .*, (\d+)x(\d+)\s/
+            unless result_width and result_height
+              result_width, result_height = $1.to_i, $2.to_i
+            end
+          when /^Error while decoding stream/
+            error_count += 1
+        end
+        if progress and elapsed_time and expected_duration
+          progress.call(elapsed_time, expected_duration)
+        end
+      end
+      if error_count > 0
+        if stream_count == 1 and expected_duration and final_duration
+          if expected_duration.floor == final_duration.floor
+            @logger.warn "ffmpeg exited with error, but seems to have written complete stream."
+          else
+            unless final_duration >= expected_duration - 1  # 1 second margin
+              raise FfmpegError, "ffmpeg failed with incomplete stream"
+            end
+            @logger.warn "ffmpeg exited with error, but seems to have written nearly complete stream. Good enough."
           end
-          progress.call(elapsed_time, expected_duration) if elapsed_time and expected_duration
+        else
+          raise FfmpegError, "ffmpeg failed with errors"
         end
       end
 
