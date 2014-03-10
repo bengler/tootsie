@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>Tootsie by alexstaubo</title>
-    
+    <title>Tootsie by bengler</title>
+
     <link rel="stylesheet" href="stylesheets/styles.css">
     <link rel="stylesheet" href="stylesheets/pygment_trac.css">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
@@ -17,35 +17,223 @@
       <header>
         <h1>Tootsie</h1>
         <p>Tootsie is an audio and video transcoding that suppots Amazon S3 and Amazon SQS. MIT license.</p>
-        <p class="view"><a href="https://github.com/alexstaubo/tootsie">View the Project on GitHub <small>alexstaubo/tootsie</small></a></p>
+
+        <p class="view"><a href="https://github.com/bengler/tootsie">View the Project on GitHub <small>bengler/tootsie</small></a></p>
+
+
         <ul>
-          <li><a href="https://github.com/alexstaubo/tootsie/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/alexstaubo/tootsie/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/alexstaubo/tootsie">Fork On <strong>GitHub</strong></a></li>
+          <li><a href="https://github.com/bengler/tootsie/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/bengler/tootsie/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/bengler/tootsie">View On <strong>GitHub</strong></a></li>
         </ul>
       </header>
       <section>
-        <p>Tootsie is a simple, robust, scalable audio/video/image transcoding/modification application. Tootsie can transcode audio, video and images between different formats, and also perform basic manipulations such as photo scaling and cropping, for generating thumbnails and photos at different resolutions.</p>
+        <h1>
+<a name="tootsie" class="anchor" href="#tootsie"><span class="octicon octicon-link"></span></a>Tootsie</h1>
+
+<p><strong>Note: Tootsie is currently distributed as an application, and no longer as a gem.</strong></p>
+
+<p>Tootsie is a simple, robust, scalable audio/video/image transcoding/modification application.</p>
+
+<p>Tootsie can transcode audio, video and images between different formats, and also perform basic manipulations such as photo scaling and cropping, for generating thumbnails and photos at different resolutions.</p>
+
+<p>For integrating into web apps, we recommend <a href="http://github.com/bengler/tiramisu">Tiramisu</a>, which is written specifically for Tootsie.</p>
+
+<h2>
+<a name="overview" class="anchor" href="#overview"><span class="octicon octicon-link"></span></a>Overview</h2>
 
 <p>Tootsie is divided into multiple independent parts:</p>
 
+<h3>
+<a name="api" class="anchor" href="#api"><span class="octicon octicon-link"></span></a>API</h3>
+
+<p>The API providers a simple way to submit new jobs.</p>
+
+<h3>
+<a name="job-manager" class="anchor" href="#job-manager"><span class="octicon octicon-link"></span></a>Job manager</h3>
+
+<p>The job manager accepts new transcoding jobs and executes the. The job manager uses a persistent queue, and supports either local file-based queues (not recommended and mostly suitable for testing), AMQP queues (eg., RabbitMQ) and Amazon Simple Queue Service (aka SQS).</p>
+
+<h3>
+<a name="transcoding-processors" class="anchor" href="#transcoding-processors"><span class="octicon octicon-link"></span></a>Transcoding processors</h3>
+
+<p>There are multiple processors. External transcoding tools such as ffmpeg and ImageMagick are used to perform the actual transcoding.</p>
+
+<h3>
+<a name="storage" class="anchor" href="#storage"><span class="octicon octicon-link"></span></a>Storage</h3>
+
+<p>Tootsie can read files via HTTP[S], and can upload data via HTTP[S] POSTs. In addition, Amazon S3 buckets are also supported.</p>
+
+<h2>
+<a name="dependencies" class="anchor" href="#dependencies"><span class="octicon octicon-link"></span></a>Dependencies</h2>
+
 <ul>
-<li>Job manager: finds new transcoding jobs and executes them.</li>
-<li>FFmpeg, ImageMagick: performs the actual transcoding.</li>
-<li>Queue: stores pending tasks.</li>
-<li>Storage: loads and saves the file data.</li>
-<li>Web service: A small RESTful API for managing jobs.</li>
-</ul><p>For storage, Tootsie supports web resources (ie., reading with HTTP GET, writing with HTTP POST) and Amazon S3 buckets.</p>
+<li>Ruby 1.9 or later. (Should work with 1.8.7 still, but the tests require 1.9, so no guarantees.)</li>
+<li>Unix-like system (no Windows support currently).</li>
+<li>
+<strong>For video jobs</strong>
 
-<p>For queues, Tootsie supports local file-based queues (mostly suitable for testing), AMQP queues (eg., RabbitMQ) and Amazon Simple Queue Service (aka SQS).</p>
+<ul>
+<li>FFmpeg</li>
+<li>id3v2 (optional)</li>
+</ul>
+</li>
+<li>
+<strong>For image jobs</strong>
 
-<p>The framework is designed to be easily pluggable, and to let you pick the parts you need to build a custom transcoding service. It is also designed to be easily distributed across many nodes.</p>
+<ul>
+<li>ImageMagick</li>
+<li>Exiv2</li>
+<li>pngcrush (optional)</li>
+</ul>
+</li>
+</ul><h3>
+<a name="optional" class="anchor" href="#optional"><span class="octicon octicon-link"></span></a>Optional</h3>
 
-<h2>Jobs</h2>
+<ul>
+<li>Amazon S3 account, for loading and storage of files.</li>
+<li>AMQP-compliant server (such as RabbitMQ) or Amazon Simple Queue Service for internal task queue management.</li>
+</ul><h2>
+<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h2>
 
-<p>The task manager pops jobs from a queue and processes them. Each job specifies an input, an output, and transcoding parameters. Optionally the job may also specify a notification URL which is invoked to inform the caller about job progress.</p>
+<p><code>gem install tootsie</code></p>
 
-<p>Supported inputs:</p>
+<h2>
+<a name="running" class="anchor" href="#running"><span class="octicon octicon-link"></span></a>Running</h2>
+
+<p>Create a YAML configuration file. Call it something like <code>tootsie.conf</code>:</p>
+
+<pre><code>--- 
+  queue:
+    adapter: sqs
+    queue: tootsie
+  aws_access_key_id: &lt;your Amazon key&gt;
+  aws_secret_access_key: &lt;your Amazon secret&gt;
+  pid_path: &lt;where to write pid file&gt;
+  log_path: &lt;where to write log file&gt;
+  worker_count: &lt;number of workers&gt;
+</code></pre>
+
+<p>Start the job manager with <code>tootsie -c tootsie.conf</code>. (It will stay in the foreground unless you provide <code>-d</code>.)</p>
+
+<p>To run the web service, you will need a Rack-compatible web server, such as Unicorn. To start Unicorn on port 8080:</p>
+
+<pre><code>$ unicorn config.ru
+</code></pre>
+
+<p>Jobs may now be posted to the web service API. For example:</p>
+
+<pre><code>$ cat &lt;&lt; END | curl -XPOST -d @- http://localhost:8080/api/tootsie/v1/jobs
+{
+  "type": "video",
+  "notification_url": "http://example.com/transcoder_notification",
+  "params": {
+    "input_url": "http://example.com/test.3gp",
+    "versions": {
+      "target_url": "s3:mybucket/test.mp4?acl=public_read",
+      "audio_sample_rate": 44100,
+      "audio_bitrate": 64000,
+      "format": "flv",
+      "content_type": "video/x-flv"
+    }
+  }
+}
+END
+</code></pre>
+
+<h2>
+<a name="configuration" class="anchor" href="#configuration"><span class="octicon octicon-link"></span></a>Configuration</h2>
+
+<p>The configuration is a YAML document with the following keys:</p>
+
+<ul>
+<li>
+<code>aws_access_key_id</code>: Your Amazon key.</li>
+<li>
+<code>aws_secret_access_key</code>: Your Amazon secret.</li>
+<li>
+<code>pid_path</code>: Where to write pid file.</li>
+<li>
+<code>log_path</code>: Where to write log file.</li>
+<li>
+<code>worker_count</code>: Number of workers. Must be at least 1.</li>
+<li>
+<code>queue</code>:
+
+<ul>
+<li>
+<code>adapter</code>: Name of queue implementation to use; one of <code>sqs</code> (Amazon SQS), <code>amqp</code> (AMQP, such as RabbitMQ) or <code>file</code> (local file system, not recommended except for casual testing).</li>
+<li><em>queue options</em></li>
+</ul>
+</li>
+</ul><h3>
+<a name="exception-notification" class="anchor" href="#exception-notification"><span class="octicon octicon-link"></span></a>Exception notification</h3>
+
+<p>Tootise can report errors to services such as Airbrake and Rollbar. To accomplish this, provide a <code>LOGGER</code> object that supports the method:</p>
+
+<pre><code>def exception(exception)
+</code></pre>
+
+<h3>
+<a name="sqs" class="anchor" href="#sqs"><span class="octicon octicon-link"></span></a>SQS</h3>
+
+<p>The <code>sqs</code> adapter takes the following options:</p>
+
+<ul>
+<li>
+<code>queue</code>: The name of queue, defaults to <code>tootsie</code>.</li>
+<li>
+<code>max_backoff</code>: Max seconds to wait when queue is empty, defaults to 2.</li>
+</ul><p>Note that when running a large number of workers, you should increase the backoff interval to avoid incurring a lot of queue requests.</p>
+
+<p>Using SQS requires that you provide <code>aws_access_key_id</code> and <code>aws_secret_access_key</code> in the main config.</p>
+
+<h3>
+<a name="amqp" class="anchor" href="#amqp"><span class="octicon octicon-link"></span></a>AMQP</h3>
+
+<p>For the <code>amqp</code> adapter:</p>
+
+<ul>
+<li>
+<code>queue</code>: The name of the queue, defaults to <code>tootsie</code>.</li>
+<li>
+<code>host_name</code>: Host name of AMQP server, defaults to <code>localhost</code>.</li>
+<li>
+<code>max_backoff</code>: Max seconds to wait when queue is empty, defaults to 2.</li>
+</ul><p>Note that when running a large number of workers, you should increase the backoff interval to avoid incurring a lot of queue requests.</p>
+
+<h3>
+<a name="file" class="anchor" href="#file"><span class="octicon octicon-link"></span></a>File</h3>
+
+<p>For the <code>file</code> adapter:</p>
+
+<pre><code>root: &lt;directory to store files&gt;
+</code></pre>
+
+<h2>
+<a name="api-1" class="anchor" href="#api-1"><span class="octicon octicon-link"></span></a>API</h2>
+
+<p>To schedule jobs, one uses the REST API:</p>
+
+<ul>
+<li>
+<code>POST /api/tootsie/v1/jobs</code>: Schedule a new job. Returns 201 if the job was created.</li>
+<li>
+<code>GET /api/tootsie/v1/status</code>: Get some current processing status as a JSON hash.</li>
+</ul><p>The job must be posted as an JSON hash with the content type <code>application/json</code>. Common to all jobs are these keys:</p>
+
+<ul>
+<li>
+<code>type</code>: Type of job. See sections below for details.</li>
+<li>
+<code>notification_url</code>: Optional notification URL. Progress (including completion and failure) will be reported using POSTs.</li>
+<li>
+<code>retries</code>: Maximum number of retries, if any. Defaults to 5.</li>
+<li>
+<code>params</code>: Job-type-specific parameters.</li>
+</ul><p>The Tootsie daemon pops jobs from a queue and processes them. Each job specifies an input, an output, and transcoding parameters. Optionally the job may also specify a notification URL which is invoked to inform the caller about job progress.</p>
+
+<p>Supported inputs at the moment:</p>
 
 <ul>
 <li>HTTP resource. Currently only public (non-authenticated) resources are supported.</li>
@@ -55,7 +243,7 @@
 <ul>
 <li>HTTP resource. The encoded file will be <code>POST</code>ed to a URL.</li>
 <li>Amazon S3 bucket resource. Tootsie will need write permissions to any S3 buckets.</li>
-</ul><p>Each job may have multiple outputs given a single input. Designwise, the reason for doing this -- as opposed to requiring that the client submit multiple jobs, one for each output -- is twofold:</p>
+</ul><p>Each job may have multiple outputs given a single input. Design-wise, the reason for doing this — as opposed to requiring that the client submit multiple jobs, one for each output — is twofold:</p>
 
 <ol>
 <li><p>It allows the job to cache the input data locally for the duration of the job, rather than fetching it multiple times. One could suppose that multiple jobs could share the same cached input, but this would be awkward in a distributed setting where each node has its own file system; in such a case, a shared storage mechanism (file system, database or similar) would be needed.</p></li>
@@ -64,25 +252,8 @@
 
 <p>FFmpeg and ImageMagick are invoked for each job to perform the transcoding. These are abstracted behind set of generic options specifying format, codecs, bit rate and so on.</p>
 
-<h1>API</h1>
-
-<p>To schedule jobs, use the REST service:</p>
-
-<ul>
-<li>POST <code>/job</code>: Schedule a job. Returns 201 if the job was created.</li>
-<li>GET <code>/status</code>: Get current processing status as a JSON hash.</li>
-</ul><p>The job must be posted as an JSON hash with the content type <code>application/json</code>. Common to all job scheduling POSTs are these keys:</p>
-
-<ul>
-<li>
-<code>type</code>: Type of job. See sections below for details.</li>
-<li>
-<code>notification_url</code>: Optional notification URL. Progress (including completion and failure) will be reported using POSTs.</li>
-<li>
-<code>retries</code>: Maximum number of retries, if any. Defaults to 5.</li>
-</ul><p>Job-specific parameters are provided in the key <code>params</code>.</p>
-
-<h2>Video transcoding jobs</h2>
+<h3>
+<a name="video-transcoding-jobs" class="anchor" href="#video-transcoding-jobs"><span class="octicon octicon-link"></span></a>Video transcoding jobs</h3>
 
 <p>Video jobs have the <code>type</code> key set to either <code>video</code>, <code>audio</code>. Currently, <code>audio</code> is simply an alias for <code>video</code> and handled by the same pipeline. The key <code>params</code> must be set to a hash with these keys:</p>
 
@@ -96,7 +267,9 @@
 <li>
 <code>target_url</code>: URL to output resource, either an HTTP URL which accepts POSTs, or an S3 URL.</li>
 <li>
-<code>thumbnail</code>: If specified, a thumbnail will be generated based on the options in this hash with the following keys:</li>
+<code>thumbnail</code>: If specified, a thumbnail will be generated based on the options in this hash with the following keys:
+
+<ul>
 <li>
 <code>target_url</code>: URL to output resource, either an HTTP URL which accepts POSTs, or an S3 URL.</li>
 <li>
@@ -109,6 +282,8 @@
 <code>at_fraction</code>: Desired point (in percentage) at which the thumbnail frame should be captured. Defaults to 50% into stream.</li>
 <li>
 <code>force_aspect_ratio</code>: If <code>true</code>, force aspect ratio; otherwise aspect is preserved when computing dimensions.</li>
+</ul>
+</li>
 <li>
 <code>audio_sample_rate</code>: Audio sample rate, in hertz.</li>
 <li>
@@ -126,9 +301,13 @@
 <li>
 <code>height</code>: desired video frame height in pixels.</li>
 <li>
+<code>quality</code>: A quality value between 0.0 (low quality, low size) and 1.0 (high quality, large size) which will be translated to a compression level depending on the output coding. The default is 1.0.</li>
+<li>
 <code>format</code>: File format.</li>
 <li>
 <code>content_type</code>: Content type of resultant file. Tootsie will not be able to guess this at the moment.</li>
+<li>
+<code>strip_metadata</code>: If true, metadata such as ID3 will be deleted. Since recent ffmpeg versions have issues with ID3 tags and character encodings, this is recommended for audio files. Requires <code>id3v2</code> tool.</li>
 </ul>
 </li>
 </ul><p>Completion notification provides the following data:</p>
@@ -144,7 +323,13 @@
 <code>metadata</code>: image metadata as a hash. These are raw EXIF and IPTC data from ImageMagick.</li>
 </ul>
 </li>
-</ul><h2>Image transcoding jobs</h2>
+</ul><h4>
+<a name="quality-setting" class="anchor" href="#quality-setting"><span class="octicon octicon-link"></span></a>Quality setting</h4>
+
+<p>The <code>quality</code> setting is an abstraction of the ffmpeg <code>-qscale</code> option. Tootsie maps to a static scale between 1 and 31. This yields constant quality with a variable bitrate (VBR).</p>
+
+<h3>
+<a name="image-transcoding-jobs" class="anchor" href="#image-transcoding-jobs"><span class="octicon octicon-link"></span></a>Image transcoding jobs</h3>
 
 <p>Image jobs have the <code>type</code> key set to <code>image</code>. The key <code>params</code> must be set to a hash with these keys:</p>
 
@@ -162,15 +347,19 @@
 <li>
 <code>height</code>: Optional desired height of output image.</li>
 <li>
-<code>scale</code>: One of the following values:</li>
+<code>scale</code>: One of the following values:
+
+<ul>
 <li>
-<code>down</code> (default): The input image is scaled to fit within the dimensions <code>width</code> x <code>height</code>. If only <code>width</code> or only <code>height</code> is specified, then the other component will be computed from the aspect ratio of the input image.</li>
+<code>down</code> (default): The input image is scaled to fit within the dimensions <code>width</code> x <code>height</code>, giving priority to the width. If only <code>width</code> or only <code>height</code> is specified, then the other component will be computed from the aspect ratio of the input image.</li>
 <li>
-<code>up</code>: As <code>within</code>, but allow scaling to dimensions that are larger than the input image.</li>
+<code>up</code>: As <code>fit</code>, but allow scaling to dimensions that are larger than the input image.</li>
 <li>
 <code>fit</code>: Similar to <code>down</code>, but the dimensions are chosen so the output width and height are always met or exceeded. In other words, if you pass in an image that is 100x50, specifying output dimensions as 100x100, then the output image will be 150x100.</li>
 <li>
 <code>none</code>: Don't scale at all.</li>
+</ul>
+</li>
 <li>
 <code>crop</code>: If true, crop the image to the output dimensions.</li>
 <li>
@@ -185,7 +374,7 @@
 <code>content_type</code>: Content type of resultant file. The system will be able to guess basic types such as <code>image/jpeg</code>.</li>
 </ul>
 </li>
-</ul><p>Note that scaling always preserves the aspect ratio of the original image; in other words, if the original is 100 x 200, then passing the dimensions 100x100 will produce an image that is 50x100. Enabling cropping, however, will force the aspect ratio of the specified dimensions.</p>
+</ul><p>Note that scaling always preserves the aspect ratio of the original image; in other words, if the original is 100x200, then passing the dimensions 100x100 will produce an image that is 50x100. Enabling cropping, however, will force the aspect ratio of the specified dimensions.</p>
 
 <p>If the option <code>medium</code> specifies <code>web</code>, the following additional transformations will be performed:</p>
 
@@ -211,9 +400,10 @@
 <code>height</code>: height, in pixels, of original image.</li>
 <li>
 <code>depth</code>: depth, in bits, of original image.</li>
-</ul><h2>Notifications</h2>
+</ul><h3>
+<a name="notification-hook" class="anchor" href="#notification-hook"><span class="octicon octicon-link"></span></a>Notification hook</h3>
 
-<p>If a notification URL is provided, events will be sent to it using <code>POST</code> requests as JSON data. These are 'fire and forget' and will currently not be retried on failure, and the response status code is ignored.</p>
+<p>If a notification hook URL is provided, events will be sent to it using <code>POST</code> requests as JSON data. These are 'fire and forget' and will not be retried on failure, and the response status code is ignored.</p>
 
 <p>There are several types of events, indicated by the <code>event</code> key:</p>
 
@@ -226,7 +416,8 @@
 <code>failed</code>: The job failed. The key <code>reason</code> will contain a textual explanation for the failure.</li>
 <li>
 <code>failed_will_retry</code>: The job failed, but is being rescheduled for retrying. The key <code>reason</code> will contain a textual explanation for the failure.</li>
-</ul><h2>Resource URLs</h2>
+</ul><h3>
+<a name="resource-urls" class="anchor" href="#resource-urls"><span class="octicon octicon-link"></span></a>Resource URLs</h3>
 
 <p>Tootsie supports referring to inputs and outputs using URLs, namely <code>file:</code> and <code>http:</code>. Additionally, Tootsie supports its own proprietary S3 URL format.</p>
 
@@ -238,9 +429,12 @@
 <p>The components are:</p>
 
 <ul>
-<li>bucketname: The name of the S3 bucket.</li>
-<li>/path/to/file: The actual S3 key.</li>
-<li>options: Optional parameters for storage, an URL query string.</li>
+<li>
+<code>bucketname</code>: The name of the S3 bucket.</li>
+<li>
+<code>/path/to/file</code>: The actual S3 key.</li>
+<li>
+<code>options</code>: Optional parameters for storage, an URL query string.</li>
 </ul><p>The options are:</p>
 
 <ul>
@@ -256,115 +450,28 @@
 <li><code>s3:myapp/video</code></li>
 <li><code>s3:myapp/thumbnails?acl=public-read&amp;storage_class=reduced_redundancy</code></li>
 <li><code>s3:myapp/images/12345?content_type=image/jpeg</code></li>
-</ul><h1>Requirements</h1>
+</ul><h2>
+<a name="current-limitations" class="anchor" href="#current-limitations"><span class="octicon octicon-link"></span></a>Current limitations</h2>
 
 <ul>
-<li>Ruby 1.8.7 or later.</li>
-</ul><p>For video jobs:</p>
+<li>No client access control; anyone can submit jobs.</li>
+<li>SQS: Due to limitations in the <code>sqs</code> gem, only US queues may be used at the moment.</li>
+<li>No Windows support.</li>
+</ul><h2>
+<a name="license" class="anchor" href="#license"><span class="octicon octicon-link"></span></a>License</h2>
 
-<ul>
-<li>FFmpeg</li>
-</ul><p>For image jobs:</p>
+<p>This software is licensed under the MIT License.</p>
 
-<ul>
-<li>ImageMagick</li>
-<li>Exiv2</li>
-<li>pngcrush (optional)</li>
-</ul><p>Optional dependencies:</p>
+<p>Copyright © 2010-2014 Alexander Staubo</p>
 
-<ul>
-<li>Amazon S3 for loading and storage of files.</li>
-<li>AMQP-compliant server (such as RabbitMQ) or Amazon Simple Queue Service for internal task queue management.</li>
-</ul><h1>Installation</h1>
+<p>Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:</p>
 
-<p><code>gem install tootsie</code></p>
+<p>The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.</p>
 
-<h1>Running</h1>
-
-<p>Create a configuration, eg. <code>tootsie.conf</code>:</p>
-
-<pre><code>--- 
-  queue:
-    adapter: sqs
-    queue: tootise
-  aws_access_key_id: &lt;your Amazon key&gt;
-  aws_secret_access_key: &lt;your Amazon secret&gt;
-  pid_path: &lt;where to write pid file&gt;
-  log_path: &lt;where to write log file&gt;
-  worker_count: &lt;number of workers&gt;
-</code></pre>
-
-<p>Start the task manager with <code>tootsie -c tootsie.conf</code>.</p>
-
-<p>Now create a rackup file, and call it <code>config.ru</code>:</p>
-
-<pre><code>require 'tootsie'
-Tootsie::Application.new.configure!('tootsie.conf')
-run Tootsie::WebService
-</code></pre>
-
-<p>To run the web service, you will need a Rack-compatible web server, such as Unicorn or Thin. To start with Thin on port 9090:</p>
-
-<pre><code>$ thin --daemonize --rackup config.ru --port 9090 start
-</code></pre>
-
-<p>Jobs may now be posted to the web service API. For example:</p>
-
-<pre><code>$ cat &lt;&lt; END | curl -d @- http://localhost:9090/job
-{
-  "type": "video",
-  "notification_url": "<a href="http://example.com/transcoder_notification">http://example.com/transcoder_notification</a>",
-  "params": {
-    "input_url": "<a href="http://example.com/test.3gp">http://example.com/test.3gp</a>",
-    "versions": {
-      "target_url": "s3:mybucket/test.mp4?acl=public_read",
-      "audio_sample_rate": 44100,
-      "audio_bitrate": 64000,
-      "format": "flv",
-      "content_type": "video/x-flv"
-    }
-  }
-}
-END
-</code></pre>
-
-<h1>Configuration</h1>
-
-<p>The configuration is a YAML document with the following keys:</p>
-
-<pre><code>aws_access_key_id: &lt;your Amazon key&gt;
-aws_secret_access_key: &lt;your Amazon secret&gt;
-pid_path: &lt;where to write pid file&gt;
-log_path: &lt;where to write log file&gt;
-worker_count: &lt;number of workers&gt;
-queue:
-  &lt;... queue options ...&gt;
-</code></pre>
-
-<p>The queue options is a hash with a key <code>adapter</code> telling Tootsie which queue implementation to use.</p>
-
-<p>The <code>sqs</code> adapter takes the following options:</p>
-
-<pre><code>queue_name: &lt;name of queue, defaults to 'tootsie'&gt;
-max_backoff: &lt;max seconds to wait when queue is empty, defaults to 2&gt;
-</code></pre>
-
-<p>For the <code>amqp</code> adapter:</p>
-
-<pre><code>queue_name: &lt;name of queue, defaults to 'tootsie'&gt;
-host_name: &lt;host name of AMQP server, defaults to localhost&gt;
-max_backoff: &lt;max seconds to wait when queue is empty, defaults to 2&gt;
-</code></pre>
-
-<p>For the <code>file</code> adapter:</p>
-
-<pre><code>root: &lt;directory to store files&gt;
-</code></pre>
-
-<p>Note that when running a large number of workers, you should increase the backoff interval to avoid incurring a lot of queue requests.</p>
+<p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
       </section>
       <footer>
-        <p>This project is maintained by <a href="https://github.com/alexstaubo">alexstaubo</a></p>
+        <p>This project is maintained by <a href="https://github.com/bengler">bengler</a></p>
         <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
       </footer>
     </div>
