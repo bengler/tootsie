@@ -144,10 +144,6 @@ Schedule a new job. Returns 201 if the job was created. The job must be posted a
 * `reference`: A client-supplied value (or hash of values). Tootsie ignores the contents of this value. The value will be passed as part of notifications.
 * `path`: The root path of the UID generated for each job. Optional, defaults to `tootsie`. This can be used to create multiple concurrent queues, by creating separate listeners for each path. See section on configuration. Note that a path must be registered in the configuration before it can be used by the API.
 
-### `GET /api/tootsie/v1/status`
-
-Get some current processing status as a JSON hash.
-
 Workflow
 --------
 
