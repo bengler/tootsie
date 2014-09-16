@@ -3,6 +3,7 @@
 require_relative '../config/environment'
 
 adapter = Class.new do
+
   def configure_start_command(command)
   end
 
@@ -12,8 +13,17 @@ adapter = Class.new do
   def configure_supervisor(supervisor)
     supervisor.add_listener(Tootsie::Worker.new,
       name: 'tootsie',
+      path: 'tootsie|default',  # 'tootsie' is for backwards compatibility
       event: 'tootsie.job')
+    Tootsie::Configuration.instance.paths.each do |path, options|
+      supervisor.add_listener(Tootsie::Worker.new, {
+        name: "tootsie.#{path}",
+        path: path,
+        event: 'tootsie.job'
+      }, worker_count: options[:worker_count])
+    end
   end
+
 end.new
 
 Pebbles::River::DaemonHelper.run(adapter, logger: LOGGER)

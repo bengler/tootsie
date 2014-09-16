@@ -95,6 +95,21 @@ The configuration `config/tootsie.conf` is a YAML document with the following ke
 * `create_failure_queue`: If true, a queue is automatically created that is bound to the exchange with a routing key such that any permanently failed jobs end up here. This queue can be used to inspect failures and requeue them.
 * `failure_queue_ttl`: If set, the failure queue will be created with this TTL setting (requires RabbitMQ). Unlike RabbitMQ, this specifies the timeout in _seconds_.
 * `use_legacy_completion_event`: If true, use the event type `tootsie_completed` instead of `tootsie.completed`.
+* `paths`: Specify separate paths that will be mapped to queues, each of which have different processing behaviours. See section below.
+
+### Paths
+
+To specify multiple concurrent queues that can be targeted by the API and have different workers:
+
+    paths:
+      high_priority:
+        worker_count: 10
+
+This will create a listener that only listens for jobs added with the path `high_priority`. The worker setting means this listener will get more workers than the default queue.
+
+The default path is `default`. It gets the worker count specified on the daemon command line.
+
+**Important**: If you previously have run without any paths set, you must manually unbind the queue `tootsie` from the routing key `tootsie.job._.#._.#`. Otherwise priority-based queues will get _all_ messages.
 
 ### Old settings no longer supported
 
@@ -127,7 +142,7 @@ Schedule a new job. Returns 201 if the job was created. The job must be posted a
 * `retries`: Maximum number of retries, if any. Defaults to 5.
 * `params`: Job-type-specific parameters.
 * `reference`: A client-supplied value (or hash of values). Tootsie ignores the contents of this value. The value will be passed as part of notifications.
-* `path`: The root path of the UID generated for each job. Optional.
+* `path`: The root path of the UID generated for each job. Optional, defaults to `tootsie`. This can be used to create multiple concurrent queues, by creating separate listeners for each path. See section on configuration. Note that a path must be registered in the configuration before it can be used by the API.
 
 ### `GET /api/tootsie/v1/status`
 

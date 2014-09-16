@@ -22,7 +22,12 @@ module Tootsie
       post %r{/job(s)?/?} do
         post = JSON.parse(request.env["rack.input"].read).symbolize_keys
 
-        path = post[:path] || 'tootsie'
+        path = post[:path]
+        if path and not Configuration.instance.paths[path]
+          logger.warn "Unregistered path, using default: #{path}"
+          path = nil
+        end
+        path ||= 'default'
 
         job_data = post.except(:session, :captures, :splat, :path, :created_at)
         job_data[:uid] = ["tootsie.job:#{path}$",

@@ -14,7 +14,10 @@ describe V1 do
   before :each do
     Tootsie::Configuration.instance.update(
       aws_access_key_id: "KEY",
-      aws_secret_access_key: "SECRET")
+      aws_secret_access_key: "SECRET",
+      paths: {
+        dustin_hoffman: {}
+      })
   end
 
   ["/jobs", "/job"].each do |path|
@@ -51,7 +54,7 @@ describe V1 do
         }
 
         expect(Configuration.instance.river).to receive(:publish) do |event|
-          expect(event[:uid]).to match /^tootsie\.job:tootsie\$/
+          expect(event[:uid]).to match /^tootsie\.job:default\$/
         end
         post '/jobs', JSON.dump(attributes)
         last_response.status.should eq 201

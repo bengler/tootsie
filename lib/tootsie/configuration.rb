@@ -12,6 +12,7 @@ module Tootsie
       @logger ||= Logger.new($stdout)
       @use_legacy_completion_event = true
       @failure_queue_ttl = nil
+      @paths = {}
     end
 
     def update(config)
@@ -37,10 +38,16 @@ module Tootsie
         :aws_secret_access_key,
         :create_failure_queue,
         :failure_queue_ttl,
-        :use_legacy_completion_event].each do |key|
+        :use_legacy_completion_event,
+        :paths
+      ].each do |key|
         if config.include?(key)
           self.send("#{key}=", config[key])
         end
+      end
+
+      @paths.each do |_, path|
+        path.symbolize_keys.assert_valid_keys(:worker_count)
       end
 
       if @create_failure_queue
@@ -80,6 +87,7 @@ module Tootsie
     attr_accessor :aws_access_key_id
     attr_accessor :create_failure_queue
     attr_accessor :failure_queue_ttl
+    attr_accessor :paths
 
     attr_reader :river
     attr_reader :logger
