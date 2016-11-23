@@ -18,7 +18,10 @@ module Tootsie
               close
 
               response = Excon.get(uri,
-                :headers => {'Accept' => '*/*'},
+                :headers => {
+                  'Accept' => '*/*',
+                  'User-Agent' => 'Tootsie/1.0 (+https://github.com/bengler/tootsie)'
+                },
                 :response_block => proc { |chunk, remaining_bytes, total_bytes|
                   ensure_temp_file.write(chunk)
                 })
